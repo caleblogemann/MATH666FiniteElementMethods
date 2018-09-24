@@ -1,0 +1,22 @@
+\NeedsTeXFormat{LaTeX2e}[1994/06/01]
+\ProvidesPackage{MATH666}[2018/09/21 MATH666 Package]
+
+\RequirePackage{Logemann}
+\RequirePackage{Derivative}
+\RequirePackage{Integral}
+\RequirePackage{SetTheory}
+\RequirePackage{Sum}
+\RequirePackage{LinearAlgebra}
+\RequirePackage{mcode}
+\RequirePackage{listings}
+\lstset{
+    frame=single,
+    breaklines=true,
+    postbreak=\raisebox{0ex}[0ex][0ex]{\ensuremath{\hookrightarrow\space}}
+}
+\RequirePackage{xspace}
+\newcommand{\MATLAB}{\textsc{Matlab}\xspace}
+\newcommand{\PYTHON}{\textsc{Python}\xspace}
+
+\renewcommand{\v}[1]{\mathbf{#1}}
+\newcommand{\M}[1]{\mathbf{#1}}

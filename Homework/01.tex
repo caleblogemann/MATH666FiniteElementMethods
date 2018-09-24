@@ -1,0 +1,150 @@
+\documentclass[11pt, oneside]{article}
+\usepackage[letterpaper, margin=2cm]{geometry}
+\usepackage{MATH666}
+
+\begin{document}
+\noindent \textbf{\Large{Caleb Logemann \\
+MATH666 Finite Element Methods \\
+Homework 1
+}}
+
+%\lstinputlisting[language=MATLAB]{H01_23.m}
+\begin{enumerate}
+  \item[\#1]
+    \item[(a)] % Done
+      In order to recast this as a variational problem we will multiply the
+      equation by a test function and integrate.
+
+      \begin{align*}
+        -u'' + q u &= f \\
+        -\dintt{-\pi}{\pi}{u''v}{x} + \dintt{-\pi}{\pi}{quv}{x} &= \dintt{-\pi}{\pi}{fv}{x}\\
+        \dintt{-\pi}{\pi}{u'v'}{x} - \eval*{\p{u'v}}{-\pi}{\pi}+ \dintt{-\pi}{\pi}{quv}{x} &= \dintt{-\pi}{\pi}{fv}{x} \\
+        \intertext{If we let $v(\pi) = v(-\pi)$, then the boundary term goes to zero because $u'(\pi) = u'(-\pi)$}
+        \dintt{-\pi}{\pi}{u'v'}{x} + \dintt{-\pi}{\pi}{quv}{x} &= \dintt{-\pi}{\pi}{fv}{x} \\
+      \end{align*}
+      Thus the variational problem is to find a
+      $u \in V = \set{\dintt*{-\pi}{\pi}{(u')^2 + qu^2}{x} < \infty | u(\pi) = u(-\pi), u'(\pi) = u'(-\pi)}$
+      \begin{align*}
+        \dintt{\pi}{\pi}{u'v'}{x} + \dintt{-\pi}{\pi}{quv}{x} &= \dintt{-\pi}{\pi}{fv}{x}
+      \end{align*}
+      for all $v \in V$.
+      The test function $v$ must satisfy the periodic boundary conditions on the
+      function value, but I believe we can also choose to have $v$ satisfy the
+      periodic condition on the derivative as well.
+      This makes the test and trial function spaces the same.
+
+    \item[(b)] % Done
+      The energy minimization problem that is equivalent to the variational
+      problem is to find a $u \in V$ such that
+      \[
+        F(u) \le F(w)
+      \]
+      for all $w \in V$, where
+      \[
+        F(w) = \frac{1}{2}\p{\dintt{\pi}{\pi}{(w')^2}{x} + \dintt{-\pi}{\pi}{qw^2}{x}} - \dintt{-\pi}{\pi}{fw}{x}
+      \]
+      I will now prove that the energy minimization problem and the variational
+      problem are equivalent.
+
+      \begin{proof}
+        Let $u$ be a solution to the variational problem, and consider some
+        $w \in V$.
+        Then there exists $v \in V$ such that $u + v = w$.
+        Now consider $F(w)$.
+        \begin{align*}
+          F(w) &= F(u + v) \\
+          &= \frac{1}{2}\p{\dintt{\pi}{\pi}{(u'+v')^2}{x} + \dintt{-\pi}{\pi}{q(u+v)^2}{x}} - \dintt{-\pi}{\pi}{f(u+v)}{x} \\
+          &= \frac{1}{2}\p{\dintt{\pi}{\pi}{(u')^2+2u'v' + (v')^2}{x} + \dintt{-\pi}{\pi}{qu^2+2quv + qv^2}{x}} - \dintt{-\pi}{\pi}{f(u+v)}{x} \\
+          &= \frac{1}{2}\p{\dintt{\pi}{\pi}{(u')^2}{x} + \dintt{-\pi}{\pi}{qu^2}{x}} - \dintt{-\pi}{\pi}{fu}{x} + \dintt{-\pi}{\pi}{u'v'}{x} + \dintt{-\pi}{\pi}{quv}{x} - \dintt{-\pi}{\pi}{fv}{x} + \dintt{-\pi}{\pi}{(v')^2 + qv^2}{x} \\
+          &= F(u) + \dintt{-\pi}{\pi}{u'v'}{x} + \dintt{-\pi}{\pi}{quv}{x} - \dintt{-\pi}{\pi}{fv}{x} +  \dintt{-\pi}{\pi}{(v')^2 + qv^2}{x} \\
+          \intertext{Since $u$ is a solution to the variational problem the middle three terms cancel}
+          &= F(u) +  \dintt{-\pi}{\pi}{(v')^2 + qv^2}{x} \\
+          \intertext{Also since $q(x) > 0$ for $x \in \br{-\pi, \pi}$, this integral is nonnegative}
+          &\ge F(u)
+        \end{align*}
+        This shows that $u$ is a solution to the energy minization problem when
+        $u$ is a solution to the variational problem.
+
+        Now let $u$ be a solution to the energy minimization problem, then 
+        \[
+          F(u) \le F(w)
+        \]
+        for all $w \in V$.
+        Let $v \in V$ and consider $w = u + \varepsilon v$, then
+        $F(u) \le F(u + \varepsilon v)$.
+        Consider the function of $\varepsilon$,
+        \[
+          g(\varepsilon) = F(u + \varepsilon v)
+        \]
+        we know that $g$ has a minimum at $\varepsilon = 0$ thus $g'(0) = 0$.
+        \begin{align*}
+          g(\varepsilon) &= \frac{1}{2}\p{\dintt{\pi}{\pi}{(u'+\varepsilon v')^2}{x} + \dintt{-\pi}{\pi}{q(u+\varepsilon v)^2}{x}} - \dintt{-\pi}{\pi}{f(u+\varepsilon v)}{x} \\
+          &= \frac{1}{2}\p{\dintt{\pi}{\pi}{(u')^2}{x} + \dintt{-\pi}{\pi}{qu^2}{x}} - \dintt{-\pi}{\pi}{fu}{x} + \varepsilon\dintt{-\pi}{\pi}{u'v'}{x} + \varepsilon\dintt{-\pi}{\pi}{quv}{x} - \varepsilon\dintt{-\pi}{\pi}{fv}{x} + \varepsilon^2\dintt{-\pi}{\pi}{(v')^2 + qv^2}{x} \\
+          g'(\varepsilon) &= \dintt{-\pi}{\pi}{u'v'}{x} + \dintt{-\pi}{\pi}{quv}{x} - \dintt{-\pi}{\pi}{fv}{x} + 2\varepsilon\dintt{-\pi}{\pi}{(v')^2 + qv^2}{x} \\
+          g'(0) &= \dintt{-\pi}{\pi}{u'v'}{x} + \dintt{-\pi}{\pi}{quv}{x} - \dintt{-\pi}{\pi}{fv}{x} \\
+          0 &= \dintt{-\pi}{\pi}{u'v'}{x} + \dintt{-\pi}{\pi}{quv}{x} - \dintt{-\pi}{\pi}{fv}{x} \\
+          \dintt{-\pi}{\pi}{fv}{x} &= \dintt{-\pi}{\pi}{u'v'}{x} + \dintt{-\pi}{\pi}{quv}{x} \\
+        \end{align*}
+        Since this is true for any $v \in V$, this shows that $u$ is a solution
+        to the variational problem.
+      \end{proof}
+
+    \item[(c)]
+      Consider $u, w \in V$ solutions to the variational, then for any $v \in V$
+      we have
+      \begin{align*}
+        \dintt{\pi}{\pi}{u'v'}{x} + \dintt{-\pi}{\pi}{quv}{x} &= \dintt{-\pi}{\pi}{fv}{x} \\
+        \dintt{\pi}{\pi}{w'v'}{x} + \dintt{-\pi}{\pi}{qwv}{x} &= \dintt{-\pi}{\pi}{fv}{x} \\
+        \dintt{\pi}{\pi}{(u - w)'v'}{x} + \dintt{-\pi}{\pi}{q(u - w)v}{x} &= 0
+      \end{align*}
+      Thus the Galerkin Orthogonality property of this problem is
+      \[
+        \dintt{\pi}{\pi}{(u - w)'v'}{x} + \dintt{-\pi}{\pi}{q(u - w)v}{x} = 0
+      \]
+      for all $v \in V$.
+
+      The energy norm for this problem is found by letting $v = u - w$
+      \[
+        \norm[E]{u} = \dintt{\pi}{\pi}{(u')^2}{x} + \dintt{-\pi}{\pi}{qu^2}{x}
+      \]
+
+    \item[(d)]
+      The cG(1) method for this problem is formulated by replacing the test and
+      trial space $V$ with a subspace, $V^1_h$.
+      Let $-\pi = x_0 < x_1 < \cdots < x_M < x_{M+1} = \pi$ be a partition of
+      $\br{-\pi, \pi}$, and define $h_j = x_{j} - x_{j-1}$ and let
+      $h = \max[1 \le j \le M+1]{h_j}$.
+      I will also define the functions
+      \[
+        \phi_j(x) =
+        \begin{cases}
+          \frac{x - x_{j-1}}{x_j - x_{j-1}} & x_{j-1} \le x \le x_j \\
+          \frac{x - x_{j+1}}{x_j - x_{j+1}} & x_{j} \le x \le x_{j+1} \\
+          0 & \text{otherwise}
+        \end{cases}
+      \]
+      for $j = 1, 2, \cdots, M$ and
+      \[
+        \phi_0(x) = \phi_{M+1}(x) =
+        \begin{cases}
+          \frac{x - x_{0}}{x_1 - x_0} & x_{0} \le x \le x_1 \\
+          \frac{x - x_{M+1}}{x_M - x_{M+1}} & x_M \le x \le x_{M+1} \\
+          0 & \text{otherwise}
+        \end{cases}
+      \]
+
+      Then the space $V^1_h = \set{\sum{j = 1}{M+1}{\xi_j \phi_j} | \xi_{M+1} = \frac{h_1 h_{M+1}}{h_1 + h_{M+1}}\p{\frac{\xi_1}{h_1} + \frac{\xi_M}{h_{M+1}}}}$.
+      The condition on $\xi_{M+1}$ guarantees the continuity of the derivative
+      at $x_0 = x_{M+1}$.
+      The design of the basis function $\phi_{M+1}$ guarantees the continuity of
+      the function.
+
+    \item[(e)]
+
+    \item[(f)]
+    \item[(g)]
+
+  \item[\#2]
+
+\end{enumerate}
+\end{document}
