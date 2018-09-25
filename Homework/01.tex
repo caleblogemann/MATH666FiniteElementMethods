@@ -111,23 +111,23 @@ Homework 1
 
       Note that an energy inner product can be formed as well,
       \[
-        \abr[E]{u, v} = \dintt{\pi}{\pi}{u'v'}{x} + \dintt{-\pi}{\pi}{quv}{x}
-        \qquad \norm[E]{u} = \sqrt{\abr[E]{u, u}}
+        \br[E]{u, v} = \dintt{\pi}{\pi}{u'v'}{x} + \dintt{-\pi}{\pi}{quv}{x}
+        \qquad \norm[E]{u} = \sqrt{\br[E]{u, u}}
       \]
       This satisfies all the properties of an inner product.
       \begin{align*}
-        \abr[E]{u, v} &= \abr[E]{v, u} \\
-        \abr[E]{au, v} &= a\abr[E]{u, v} \\
-        \abr[E]{u + w, v} &= \abr[E]{u, v} + \abr[E]{w, v} \\
-        \abr[E]{u, u} \ge 0 \\
-        \abr[E]{u, u} = 0 &\Leftrightarrow u = 0
+        \br[E]{u, v} &= \br[E]{v, u} \\
+        \br[E]{au, v} &= a\br[E]{u, v} \\
+        \br[E]{u + w, v} &= \br[E]{u, v} + \br[E]{w, v} \\
+        \br[E]{u, u} \ge 0 \\
+        \br[E]{u, u} = 0 &\Leftrightarrow u = 0
       \end{align*}
       Note that $q > 0$ is required for the last two statements.
       The fact that this forms an inner product allows the Cauchy-Schwarz
       inequality to be applied directly to the energy norm.
       Also the Galerkin Orthogonality condition can be expressed as
       \[
-        \abr[E]{u - w, v} = 0
+        \br[E]{u - w, v} = 0
       \]
       for $u, w$ solutions to the variational problem and for all $v \in V$.
 
@@ -162,7 +162,7 @@ Homework 1
       The design of the basis function $\phi_{M+1}$ guarantees the continuity of
       the function.
 
-    \item[(e)]
+    \item[(e)] % Done
       The following will show that the cG(1) method gives the optimal solution
       in the energy norm.
 
@@ -170,11 +170,11 @@ Homework 1
         Let $u$ be the solution to the original variational and let $U$ be the
         solution to the cG(1) method.
         Consider an arbitrary $v \in V^1_h$, and note that Galerkin orthogonality states
-        that $\abr[E]{u - U, U - v} = 0$.
+        that $\br[E]{u - U, U - v} = 0$.
         \begin{align*}
-          \norm[E]{u - U}^2 &= \abr[E]{u - U, u - U} \\
-          &= \abr[E]{u - U, u - U} + \abr[E]{u - U, U - v} \\
-          &= \abr[E]{u - U, u - v}
+          \norm[E]{u - U}^2 &= \br[E]{u - U, u - U} \\
+          &= \br[E]{u - U, u - U} + \br[E]{u - U, U - v} \\
+          &= \br[E]{u - U, u - v}
           \intertext{Using Cauchy-Schwarz}
           &\le \norm[E]{u - U}\norm[E]{u - v}
         \end{align*}
@@ -193,8 +193,61 @@ Homework 1
       \]
       since the $h$ term dominates the error.
 
-    \item[(f)]
+    \item[(f)] % Done
+      Now I will find an error estimate in the $L^2$ norm.
 
+      First note that this problem is self adjoint, and so the dual problem is
+      \begin{align*}
+        -\phi'' + q \phi &= e \\
+        \phi(-\pi) &= \phi(\pi) \\
+        \phi'(-\pi) &= \phi'(\pi) \\
+      \end{align*}
+
+      Now consider $\norm[L^2]{e}^2$,
+      \begin{align*}
+        \norm[L^2]{e}^2 &= \dintt{-\pi}{\pi}{e^2}{x}
+        \intertext{Using the dual problem}
+        &= \dintt{-\pi}{\pi}{e\p{-\phi'' + q\phi}}{x} \\
+        &= -\dintt{-\pi}{\pi}{e\phi''}{x} + \dintt{-\pi}{\pi}{qe\phi}{x} \\
+        &= \dintt{-\pi}{\pi}{e'\phi'}{x} + \dintt{-\pi}{\pi}{qe\phi}{x}
+        \intertext{Using Galerkin Orthogonality}
+        &= \dintt{-\pi}{\pi}{e'\phi'}{x} + \dintt{-\pi}{\pi}{qe\phi}{x} - \dintt{-\pi}{\pi}{e'\pi_h\phi'}{x} - \dintt{-\pi}{\pi}{qe\pi_h\phi}{x} \\
+        &= \dintt{-\pi}{\pi}{e'(\phi - \pi_h \phi)'}{x} + \dintt{-\pi}{\pi}{qe(\phi - \pi_h\phi)}{x} \\
+        &= \br[E]{e, \phi - \pi_h \phi}
+        \intertext{Now applying Cauchy-Schwarz}
+        &\le \norm[E]{e} \norm[E]{\phi - \pi_h \phi}
+        \intertext{From part (e)}
+        &\le C h \norm{u''} \norm[E]{\phi - \pi_h \phi}
+      \end{align*}
+      Now consider $\norm[E]{\phi - \pi_h \phi}$
+      \begin{align*}
+        \norm[E]{\phi - \pi_h \phi}^2 &= \dintt{-\pi}{\pi}{((\phi - \pi_h \phi)')^2}{x} + \dintt{-\pi}{\pi}{q(\phi - \pi_h \phi)^2}{x} \\
+        &\le C_1 h^2 \norm{\phi''}^2 + C_2 h^4 \norm{\phi''}^2
+        \intertext{Since the $h^2$ term dominates, the $h^4$ term can be incorporated into $C_1$}
+        &\le C_1 h^2 \norm{\phi''}^2
+      \end{align*}
+      Therefore $\norm[E]{\phi - \pi_h \phi} \le C h \norm{\phi''}$.
+
+      Next I will show that $\norm{\phi''} \le C \norm{e}$.
+      Consider the dual problem again.
+      \begin{align*}
+        -\phi'' + q\phi &= e \\
+        \dintt{-\pi}{\pi}{(-\phi'' + q\phi)^2}{x} &= \dintt{-\pi}{\pi}{e^2}{x} \\
+        \dintt{-\pi}{\pi}{(\phi'')^2 - 2q\phi''\phi + q^2\phi^2}{x} &= \dintt{-\pi}{\pi}{e^2}{x} \\
+        \norm{\phi''}^2 + \dintt{-\pi}{\pi}{-2q\phi''\phi + q^2\phi^2}{x} &= \norm{e}^2\\
+        \norm{\phi''}^2 + \dintt{-\pi}{\pi}{2q(\phi')^2 + q^2\phi^2}{x} &= \norm{e}^2\\
+        \norm{\phi''}^2 &= \norm{e}^2 - \dintt{-\pi}{\pi}{2q(\phi')^2 + q^2\phi^2}{x}\\
+        \intertext{Since $\dintt{-\pi}{\pi}{2q(\phi')^2 + q^2\phi^2}{x}$ is strictly positive}
+        \norm{\phi''}^2 &\le \norm{e}^2 \\
+      \end{align*}
+      Now putting this all together shows that 
+      \[
+        \norm[L^2]{e}^2 \le C h \norm[L^2]{u''} \norm[E]{\phi - \pi_h \phi} \le C h^2 \norm[L^2]{u''} \norm[L^2]{\phi''} \le C h^2 \norm[L^2]{u''} \norm[L^2]{e}
+      \]
+      Dividing both side by $\norm[L^2]{e}$ gives
+      \[
+        \norm[L^2]{e} \le C h^2 \norm[L^2]{u''}
+      \]
 
     \item[(g)]
 
