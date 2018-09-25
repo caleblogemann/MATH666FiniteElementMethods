@@ -89,7 +89,7 @@ Homework 1
         to the variational problem.
       \end{proof}
 
-    \item[(c)]
+    \item[(c)] % Done
       Consider $u, w \in V$ solutions to the variational, then for any $v \in V$
       we have
       \begin{align*}
@@ -101,14 +101,37 @@ Homework 1
       \[
         \dintt{\pi}{\pi}{(u - w)'v'}{x} + \dintt{-\pi}{\pi}{q(u - w)v}{x} = 0
       \]
-      for all $v \in V$.
+      for $u$, $w$ solutions to the variational problem and for all $v \in V$.
 
-      The energy norm for this problem is found by letting $v = u - w$
+      The energy norm for this problem is found by letting $v = u - w$ and
+      taking the squareroot.
       \[
-        \norm[E]{u} = \dintt{\pi}{\pi}{(u')^2}{x} + \dintt{-\pi}{\pi}{qu^2}{x}
+        \norm[E]{u} = \sqrt{\dintt{\pi}{\pi}{(u')^2}{x} + \dintt{-\pi}{\pi}{qu^2}{x}}
       \]
 
-    \item[(d)]
+      Note that an energy inner product can be formed as well,
+      \[
+        \abr[E]{u, v} = \dintt{\pi}{\pi}{u'v'}{x} + \dintt{-\pi}{\pi}{quv}{x}
+        \qquad \norm[E]{u} = \sqrt{\abr[E]{u, u}}
+      \]
+      This satisfies all the properties of an inner product.
+      \begin{align*}
+        \abr[E]{u, v} &= \abr[E]{v, u} \\
+        \abr[E]{au, v} &= a\abr[E]{u, v} \\
+        \abr[E]{u + w, v} &= \abr[E]{u, v} + \abr[E]{w, v} \\
+        \abr[E]{u, u} \ge 0 \\
+        \abr[E]{u, u} = 0 &\Leftrightarrow u = 0
+      \end{align*}
+      Note that $q > 0$ is required for the last two statements.
+      The fact that this forms an inner product allows the Cauchy-Schwarz
+      inequality to be applied directly to the energy norm.
+      Also the Galerkin Orthogonality condition can be expressed as
+      \[
+        \abr[E]{u - w, v} = 0
+      \]
+      for $u, w$ solutions to the variational problem and for all $v \in V$.
+
+    \item[(d)] % Done
       The cG(1) method for this problem is formulated by replacing the test and
       trial space $V$ with a subspace, $V^1_h$.
       Let $-\pi = x_0 < x_1 < \cdots < x_M < x_{M+1} = \pi$ be a partition of
@@ -140,8 +163,39 @@ Homework 1
       the function.
 
     \item[(e)]
+      The following will show that the cG(1) method gives the optimal solution
+      in the energy norm.
+
+      \begin{proof}
+        Let $u$ be the solution to the original variational and let $U$ be the
+        solution to the cG(1) method.
+        Consider an arbitrary $v \in V^1_h$, and note that Galerkin orthogonality states
+        that $\abr[E]{u - U, U - v} = 0$.
+        \begin{align*}
+          \norm[E]{u - U}^2 &= \abr[E]{u - U, u - U} \\
+          &= \abr[E]{u - U, u - U} + \abr[E]{u - U, U - v} \\
+          &= \abr[E]{u - U, u - v}
+          \intertext{Using Cauchy-Schwarz}
+          &\le \norm[E]{u - U}\norm[E]{u - v}
+        \end{align*}
+        This shows that $\norm[E]{u - U} \le \norm[E]{u - v}$.
+      \end{proof}
+
+      Now in order to find an error estimate let $v = \pi_h u$.
+      \begin{align*}
+        \norm[E]{u - U}^2 &\le \norm[E]{u - \pi_h u}^2 \\
+        &= \dintt{-\pi}{\pi}{((u - \pi_h u)')^2}{x} + \dintt{-\pi}{\pi}{q(u - \pi_h u)^2}{x} \\
+        &\le C h^2 \norm{u''}^2 + C h^4 \norm{u''}^2
+      \end{align*}
+      Thus
+      \[
+        \norm[E]{u - U} \le C h \norm{u''}
+      \]
+      since the $h$ term dominates the error.
 
     \item[(f)]
+
+
     \item[(g)]
 
   \item[\#2]
