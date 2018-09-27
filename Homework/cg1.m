@@ -7,7 +7,7 @@ function [ xi ] = cg1(Bij, Bi0, B00, Li, L0, a, b, nCells )
     %phiD = @(x, j) 1/h.*(x >= xj(j-1) & x < xj(j)) - 1/h.*(x >= xj(j) & x <= xj(j+1));
     %phi0 = @(x) -(x - xj(1))/h.*(x >= xj(0) & x < xj(1)) + (x - xj(nCells-1))/h.*(x >= xj(nCells-1) & x <= xj(nCells));
     %phi0D = @(x) -1/h.*(x >= xj(0) & x < xj(1)) + 1/h.*(x >= xj(nCells-1) & x <= xj(nCells));
-    
+
     A = zeros(nCells);
     for i = 1:nCells
         for j = 1:i
@@ -25,7 +25,7 @@ function [ xi ] = cg1(Bij, Bi0, B00, Li, L0, a, b, nCells )
             A(j, i) = B;
         end
     end
-    
+
     rhs = zeros(nCells, 1);
     for i = 1:nCells
         if( i < nCells)
@@ -36,9 +36,9 @@ function [ xi ] = cg1(Bij, Bi0, B00, Li, L0, a, b, nCells )
             rhs(i) = L0;
         end
     end
-    
+
     xi = A\rhs;
-    
+
     % periodic boundary conditions
     %xi = [xi(end); xi];
 end
