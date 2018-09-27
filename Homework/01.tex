@@ -1,12 +1,14 @@
 \documentclass[11pt, oneside]{article}
 \usepackage[letterpaper, margin=2cm]{geometry}
 \usepackage{MATH666}
+\usepackage{booktabs}
 
 \begin{document}
 \noindent \textbf{\Large{Caleb Logemann \\
 MATH666 Finite Element Methods \\
 Homework 1
 }}
+\pagebreak
 
 %\lstinputlisting[language=MATLAB]{H01_23.m}
 \begin{enumerate}
@@ -255,11 +257,31 @@ Homework 1
       \]
 
     \item[(g)]
+      The following function solves the cG(1) FEM.
+      \lstinputlisting[language=MATLAB]{cg1.m}
+      The following script uses this function to solve the given problem.
+      \lstinputlisting[language=MATLAB, lastline=54]{HW1.m}
+
+      The following table gives the rates of convergence.
+      \begin{center}
+        \begin{tabular}{cccccc}
+          \toprule
+          M+1 & h & Energy Error & Energy Order & L2 Error & L2 Order \\
+          \midrule
+           10 & .628 & 1.02 & - & 0.17   & -\\
+           20 & .314 & 0.52 & 1 & 0.04   & 2\\
+           40 & .157 & 0.26 & 1 & 0.01   & 2\\
+           80 & .078 & 0.13 & 1 & 0.0026 & 2\\
+          160 & .039 & 0.65 & 1 & 0.0007 & 2\\
+          \bottomrule
+        \end{tabular}
+      \end{center}
+
     \end{enumerate}
 
   \item[\#2]
     \begin{enumerate}
-      \item[(a)]
+      \item[(a)] % Done
         In order to recast this as a variational problem I will multiply by a
         test function and integrate.
 
@@ -285,7 +307,7 @@ Homework 1
         The test functions must satisfy the same boundary conditions in order
         for this operator to be self-adjoint.
 
-      \item[(b)]
+      \item[(b)] % Done
         The energy functional is given by
         \[
           F(w) = \frac{1}{2}B(w, w) - L(w) = \frac{1}{2}\dintt{0}{1}{(w'')^2}{x} - \dintt{0}{1}{fw}{x}
@@ -326,12 +348,124 @@ Homework 1
           Thus $u$ is also a solution to the Energy Minimization problem.
         \end{proof}
 
-      \item[(c)]
+      \item[(c)] % Done
+        The cG(3) method for this problem is formulated by replacing the test and
+        trial space $V$ with a subspace, $V^3_h$.
+        Let $-\pi = x_0 < x_1 < \cdots < x_M < x_{M+1} = \pi$ be a partition of
+        $\br{-\pi, \pi}$, and define $h_j = x_{j} - x_{j-1}$ and let
+        $h = \max[1 \le j \le M+1]{h_j}$.
+        I will also define the functions
+        \[
+          \phi_j^1(x) =
+          \begin{cases}
+            \p{\frac{1}{h^2} - \frac{2(x - x_j)}{h^3}}\p{x - x_{j-1}}^2 & x_{j-1} \le x \le x_j \\
+            \p{\frac{1}{h^2} + \frac{2(x - x_j)}{h^3}}\p{x - x_{j+1}}^2 & x_{j} \le x \le x_{j+1} \\
+            0 & \text{otherwise}
+          \end{cases}
+        \]
+        and
+        \[
+          \phi_j^2(x) =
+          \begin{cases}
+            (x - x_j)\frac{\p{x - x_{j-1}}^2}{h^2} & x_{j-1} \le x \le x_j \\
+            (x - x_j)\frac{\p{x - x_{j+1}}^2}{h^2} & x_{j} \le x \le x_{j+1} \\
+            0 & \text{otherwise}
+          \end{cases}
+        \]
+        for $j = 1, 2, \cdots, M$ and
+        \[
+          \phi_{M+1}^1(x) =
+          \begin{cases}
+            \p{\frac{1}{h^2} - \frac{2(x - x_{M+1})}{h^3}}\p{x - x_{M}}^2 & x_{M} \le x \le x_{M+1} \\
+            0 & \text{otherwise}
+          \end{cases}
+        \]
+        \[
+          \phi_{M+1}^2(x) =
+          \begin{cases}
+            (x - x_{M+1})\frac{\p{x - x_{M}}^2}{h^2} & x_{M} \le x \le x_{M+1} \\
+            0 & \text{otherwise}
+          \end{cases}
+        \]
+        for $j = M+1$.
 
+        Then the space $V^3_h = \spanspace{\phi_j^1, \phi_j^2}_{j=1}^{M+1}$.
+        The design of the basis functions guarantees the continuity of the
+        function and its derivative.
 
-      \item[(d)]
-      \item[(e)]
+        Thus the FEM is to find a solution to the variational problem in $V^3_h$,
+        that is find $u \in V^3_h$ such that
+        \[
+          B(u, v) = L(v)
+        \]
+        for all $v \in V^3_h$.
+
+      \item[(d)] % Done
+        Next I will find a a priori estimate for the error in terms of the
+        energy norm.
+        \begin{align*}
+          \norm[E]{e}^2 &= \norm[E]{u - u_h}^2 \\
+          &= B(u - u_h, u - u_h)
+          \intertext{By Galerkin Orthogonality $B(u - u_h, u_h - \pi_h u) = 0$, so}
+          &= B(u - u_h, u - u_h) + B(u - u_h, u_h - \pi_h u) \\
+          &= B(u - u_h, u - \pi_h u)
+          \intertext{Using Cauchy-Schwarz}
+          &\le \norm[E]{u - u_h} \norm[E]{u - \pi_h u} \\
+          \norm[E]{e} &\le \norm[E]{u - \pi_h u} \\
+          &\le \sqrt{\dintt{0}{1}{((u - \pi_h u)'')^2}{x}} \\
+          &\le \sqrt{\dintt{0}{1}{(ch^2\norm[L^2]{u^{(iv)}})^2}{x}} \\
+          &\le ch^2\norm[L^2]{u^{(iv)}} \\
+        \end{align*}
+        Thus this method is second order accurate in the energy norm.
+
+      \item[(e)] % Done
+        The error estimate in the $L^2$ norm can be found by considering the
+        dual problem.
+        Since this problem is self-adjoint, the dual problem is
+        \begin{align*}
+          \phi^{(iv)} = f \\
+          \phi(0) = \phi'(0) = \phi''(1) = \phi'''(1) = 0
+        \end{align*}
+
+        Now consider $\norm[L^2]{e}^2$.
+        \begin{align*}
+          \norm[L^2]{e}^2 &= \dintt{0}{1}{e^2}{x} \\
+          &= \dintt{0}{1}{e \phi^{(iv)}}{x} \\
+          &= -\dintt{0}{1}{e' \phi'''}{x} \\
+          &= \dintt{0}{1}{e'' \phi''}{x}
+          \intertext{Using Galerkin Orthogonality}
+          &= \dintt{0}{1}{e'' \phi''}{x} - \dintt{0}{1}{e''(\pi_h \phi)''}{x}\\
+          &= \dintt{0}{1}{e'' (\phi - \pi_h \phi)''}{x}
+          \intertext{By the Cauchy-Scwarz Inequality}
+          &\le \norm[E]{e} \norm[E]{\phi - \pi_h \phi} \\
+          &\le C h^2\norm[L^2]{u^{(iv)}} Ch^2 \norm[L^2]{\phi^{(iv)}}
+          \intertext{Using the dual problem and taking the $L^2$ norm of both
+          sides, we see that $\norm[L^2]{\phi^{(iv)}} = \norm[L^2]{e}$}.
+          \norm[L^2]{e}^2 &\le C h^4 \norm[L^2]{u^{(iv)}} \norm[L^2]{e} \\
+          \norm[L^2]{e} &\le C h^4 \norm[L^2]{u^{(iv)}} \\
+        \end{align*}
+        Thus the FEM is fourth order accurate in the $L^2$ norm.
+
       \item[(f)]
+        The following function solves the cG(3) FEM.
+        \lstinputlisting[language=MATLAB]{cg3.m}
+        The following script uses this function to solve the given problem.
+        \lstinputlisting[language=MATLAB, firstline=51, lastline=124]{HW1.m}
+
+        The following shows the order of convergence
+        \begin{center}
+          \begin{tabular}{cccccc}
+            \toprule
+            M+1 & h & Energy Error & Energy Order & L2 Error & L2 Order \\
+            \midrule
+             10 & 0.1     & 3.6   & -    & 0.0016    & -\\
+             20 & 0.05    & 0.9   & 1.99 & 0.0001    & 3.99\\
+             40 & 0.025   & 0.22  & 1.99 & 0.000006  & 4.02\\
+             80 & 0.0125  & 0.057 & 1.99 & 0.0000004 & 3.83\\
+            160 & 0.00625 & 0.013 & 2.05 & 0.0000004 & 0.065\\
+            \bottomrule
+          \end{tabular}
+        \end{center}
     \end{enumerate}
 
 \end{enumerate}
