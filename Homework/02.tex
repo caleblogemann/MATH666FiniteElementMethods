@@ -1,17 +1,138 @@
-\documentclass[11pt, oneside]{article}
+\documentclass[11pt, titlepage]{article}
+\author{Caleb Logemann}
+\title{MATH 666: Finite Element Methods \\ Homework 2}
+\date{October 23, 2018}
 \usepackage[letterpaper, margin=2cm]{geometry}
 \usepackage{MATH666}
 \usepackage{booktabs}
 
 \begin{document}
-\noindent \textbf{\Large{Caleb Logemann \\
-MATH666 Finite Element Methods \\
-Homework 1
-}}
-\pagebreak
+\maketitle
 
 %\lstinputlisting[language=MATLAB]{H01_23.m}
 \begin{enumerate}
+  \item[\#1]
+    Consider the 2D Poisson equation:
+    \begin{align*}
+      \mathbf{PDE}:& \quad -\nabla \cdot \nabla u = f(x, y) \quad \text{in} \quad \Omega = \br{-1,1} \times \br{-1,1} \\
+      \mathbf{BC}:& \quad u + \nabla u \cdot \hat{\v{n}} = g \quad \text{on} \quad  \partial\Omega
+    \end{align*}
+    \begin{enumerate}
+      \item[(a)]
+        Recast this problem as a variational problem.
+        Clearly state the test and trial function spaces.
 
+        In order to recast this as a variational problem, I will multiply by a
+        test function and integrate over $\Omega$.
+        \begin{align*}
+          \diintt{\Omega}{}{-\p{\nabla \cdot \nabla u} v}{\v{x}} &= \diintt{\Omega}{}{f v}{\v{x}}
+          \intertext{Integrating by parts gives}
+          \diintt{\Omega}{}{\nabla u \cdot \nabla v}{\v{x}} - \dintt{\partial\Omega}{}{\p{\nabla u \cdot \hat{\v{n}}} v}{s} &= \diintt{\Omega}{}{f v}{\v{x}}
+          \intertext{Using the boundary condition we see that $\nabla u \cdot \hat{\v{n}} = g - u$ on $\partial \Omega$}
+          \diintt{\Omega}{}{\nabla u \cdot \nabla v}{\v{x}} - \dintt{\partial\Omega}{}{\p{g - u} v}{s} &= \diintt{\Omega}{}{f v}{\v{x}} \\
+          \diintt{\Omega}{}{\nabla u \cdot \nabla v}{\v{x}} + \dintt{\partial\Omega}{}{uv}{s} &= \diintt{\Omega}{}{f v}{\v{x}} + \dintt{\partial \Omega}{}{gv}{s} \\
+        \end{align*}
+        In order for this equation to be well defined $u$ and $v$ must be in
+        the space $H^1(\Omega)$, that is they are square integrable on $\Omega$
+        and the norm of their gradients are square integrable on $\Omega$.
+        Note that being in $H^1(\Omega)$ implies $L^2(\partial \Omega)$, so the
+        boundary integrals are also well defined.
+
+        So the bilinear form of this variational problem is to find $u \in H^1(\Omega)$ such that
+        \[
+          B(u, v) = L(v)
+        \]
+        for all $v \in H^1(\Omega)$, where
+        \[
+          B(u,  v) = \diintt{\Omega}{}{\nabla u \cdot \nabla v}{\v{x}} + \dintt{\partial\Omega}{}{uv}{s}
+        \]
+        and
+        \[
+          L(v) = \diintt{\Omega}{}{f v}{\v{x}} + \dintt{\partial \Omega}{}{gv}{s}.
+        \]
+
+      \item[(b)]
+        Show that the variational problem has a unique solution by showing that
+        it meets all of the criteria of the Lax-Milgram Theorem.
+
+        The four conditions of the Lax-Milgram Theorem are symmetry, continuity
+        of $B$, V-ellipticity, and continuity of $L$, and are shown below.
+        \begin{align*}
+          B(u, v) &= B(v, u) \\
+          \abs{B(u, v)} &\le \gamma \norm[V]{u} \norm[V]{v} \\
+          B(v, v) &\ge \alpha \norm[V]{v}^2 \\
+          \abs{L(v)} &\le \Gamma \norm[V]{v}
+        \end{align*}
+
+        I will show these four conditions in order.
+        First, symmetry
+        \begin{align*}
+          B(u, v) &= \diintt{\Omega}{}{\nabla u \cdot \nabla v}{\v{x}} + \dintt{\partial\Omega}{}{uv}{s} \\
+          &= \diintt{\Omega}{}{\nabla v \cdot \nabla u}{\v{x}} + \dintt{\partial\Omega}{}{vu}{s} \\
+          &= B(v, u)
+        \end{align*}
+        Second, boundedness of $B$
+        \begin{align*}
+          \abs{B(u, v)} &= \abs{\diintt{\Omega}{}{\nabla u \cdot \nabla v}{\v{x}} + \dintt{\partial\Omega}{}{uv}{s}} \\
+          &\le \abs{\diintt{\Omega}{}{\nabla u \cdot \nabla v}{\v{x}}} + \abs{\dintt{\partial\Omega}{}{uv}{s}}
+          \intertext{Using Cauchy-Schwarz on both integrals gives}
+          &\le \norm[L^2(\Omega)]{\norm{\nabla u}} \norm[L^2(\Omega)]{\norm{\nabla v}} + \norm[L^2(\partial\Omega)]{u}\norm[L^2(\partial\Omega)]{v}
+          \intertext{Since $\partial\Omega \subset \Omega$, this implies that $\norm[L^2(\partial\Omega)]{u} \le \norm[L^2(\Omega)]{u}$, so}
+          &\le \norm[L^2(\Omega)]{\norm{\nabla u}} \norm[L^2(\Omega)]{\norm{\nabla v}} + \norm[L^2(\Omega)]{u}\norm[L^2(\Omega)]{v}
+          \intertext{Now since $\norm[H^1(\Omega)]{u}$ is greater than both $\norm[L^2(\Omega)]{\norm{\nabla u}}$ and $\norm[L^2(\Omega)]{u}$}
+          \abs{B(u, v)} &\le 2\norm[H^1(\Omega)]{u} \norm[H^1(\Omega)]{v}
+        \end{align*}
+        Third I will show V-ellipticity of $B$.
+        There are two possible cases $v = 0$ on $\partial \Omega$ or $v \neq 0$
+        on $\partial \Omega$.
+        If $v = 0$ on $\partial \Omega$, then
+        \begin{align*}
+          B(v, v) &= \diintt{\Omega}{}{\norm{\nabla v}^2}{\v{x}} + \dintt{\partial\Omega}{}{v^2}{s} \\
+          &= \diintt{\Omega}{}{\norm{\nabla v}^2}{\v{x}} \\
+          &= \frac{1}{2}\p{\diintt{\Omega}{}{\norm{\nabla v}^2}{\v{x}} + \diintt{\Omega}{}{\norm{\nabla v}^2}{\v{x}}} \\
+          &= \frac{1}{2}\p{\norm[L^2(\Omega)]{\norm{\nabla v}}^2 + \norm[L^2(\Omega)]{\norm{\nabla v}}^2}
+          \intertext{Poincare's Inequality states that there exists a constant
+          $C > 0$ such that $C\norm[L^2(\Omega)]{v}^2 \le \norm[L^2(\Omega)]{\norm{\nabla v}}^2$, therefore}
+          B(v, v) &\ge \frac{1}{2}\p{\norm[L^2(\Omega)]{\norm{\nabla v}}^2 + C\norm[L^2(\Omega)]{v}^2} \\
+          &\ge \frac{1}{2}\min{1, C}\p{\norm[L^2(\Omega)]{\norm{\nabla v}}^2 + \norm[L^2(\Omega)]{v}^2} \\
+          &= \frac{1}{2}\min{1, C} \norm[H^1(\Omega)]{v}
+        \end{align*}
+        If $v \neq 0$ on $\partial \Omega$, then we can make use of Friedrich's
+        Inequality, which states that there exists constants $C_1 > 0$ and
+        $C_2 > 0$ such that
+        \[
+          \diintt{\Omega}{}{v^2}{\v{x}} \le C_1\dinntt{\Omega}{}{\norm{\nabla v}^2}{x} + C_2 \dintt{\partial\Omega}{}{v^2}{s}
+        \]
+        This is equivalent to
+        \[
+          \frac{1}{C}\diintt{\Omega}{}{v^2}{\v{x}} \le \dinntt{\Omega}{}{\norm{\nabla v}^2}{x} + \dintt{\partial\Omega}{}{v^2}{s}
+        \]
+        where $C = \max{C_1, C_2}$.
+        Now,
+        \begin{align*}
+          B(v, v) &= \diintt{\Omega}{}{\norm{\nabla v}^2}{\v{x}} + \dintt{\partial\Omega}{}{v^2}{s} \\
+          &= \frac{1}{2}\diintt{\Omega}{}{\norm{\nabla v}^2}{\v{x}} + \frac{1}{2}\p{\diintt{\Omega}{}{\norm{\nabla v}^2}{\v{x}} + \dintt{\partial\Omega}{}{v^2}{s}} \\
+          \intertext{Using Friedrich's Inequality}
+          &= \frac{1}{2}\diintt{\Omega}{}{\norm{\nabla v}^2}{\v{x}} + \frac{1}{2}\p{\diintt{\Omega}{}{\norm{\nabla v}^2}{\v{x}} + \dintt{\partial\Omega}{}{v^2}{s}} \\
+        \end{align*}
+
+
+        Lastly I will show that $L$ is bounded,
+        \begin{align*}
+          \abs{L(v)} &= \abs{\diintt{\Omega}{}{f v}{\v{x}} + \dintt{\partial \Omega}{}{gv}{s}} \\
+          &\le \abs{\diintt{\Omega}{}{f v}{\v{x}}} + \abs{\dintt{\partial \Omega}{}{gv}{s}}
+          \intertext{Using Cauchy-Schwarz on both integrals gives}
+          &\le \norm[L^2(\Omega)]{f}\norm[L^2(\Omega)]{v} + \norm[L^2(\partial \Omega)]{g}\norm[L^2(\partial \Omega)]{v}
+          \intertext{Now since $\norm[H^1(\Omega)]{v}$ is greater than both $\norm[L^2(\Omega)]{v}$ and $\norm[L^2(\partial\Omega)]{v}$}
+          &\le \norm[L^2(\Omega)]{f}\norm[H^1(\Omega)]{v} + \norm[L^2(\partial \Omega)]{g}\norm[H^1(\Omega)]{v} \\
+          &\le 2\max{\norm[L^2(\Omega)]{f}, \norm[L^2(\partial \Omega)]{g}}\norm[H^1(\Omega)]{v}
+        \end{align*}
+        This shows that the variational problem satisfies all of the criteria
+        for the Lax-Milgram theorem, therefore it has a unique solution.
+
+      \item[(c)]
+      \item[(d)]
+    \end{enumerate}
+  \item[\#2]
 \end{enumerate}
 \end{document}

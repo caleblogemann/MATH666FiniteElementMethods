@@ -103,7 +103,7 @@ while 1
       
       p(ix,:)=p(ix,:)-BndProj;     % Project back to boundary
             
-      if (NormBndProj<=1.0e-12)
+      if (NormBndProj<=1.0e-8)
           mstop = 1;
       else
           d=feval(fd,p,varargin{:});
