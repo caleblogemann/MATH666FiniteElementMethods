@@ -1,5 +1,4 @@
 function [ xi ] = cg1(Bij, Bi0, B00, Li, L0, a, b, nCells )
-
     A = zeros(nCells);
     for i = 1:nCells
         for j = 1:i
@@ -26,4 +25,3 @@ function [ xi ] = cg1(Bij, Bi0, B00, Li, L0, a, b, nCells )
 
     xi = A\rhs;
 end
-
