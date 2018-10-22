@@ -1,4 +1,4 @@
-function [u] = h02_01(a, b, N, f, g)
+function [u, A] = h02_01(a, b, N, f, g)
     % this includes points at both ends
     h = (b-a)/(N-1);
 
@@ -19,11 +19,6 @@ function [u] = h02_01(a, b, N, f, g)
     e = ones(N, 1);
     % D matrix gradients on omega
     % D includes i, i-1, and i+1 terms
-    % matrix D for first or last row
-    D1 = spdiags([-1/6*e, 4/3*e, -1/6*e], -1:1, N, N);
-    % corner points
-    D1(1,1) = 2/3;
-    D1(end,end) = 2/3;
     % matrix D for middle rows
     D = spdiags([-1/3*e, 8/3*e, -1/3*e], -1:1, N, N);
     % left and right boundary points
@@ -80,24 +75,5 @@ function [u] = h02_01(a, b, N, f, g)
             b(k) = quadf;
         end
     end
-    % loop over elements
-    %num_elements = (N-1)^2;
-    %iElemFun = @(k) floor((k-1)/(N-1)) + 1;
-    %jElemFun = @(k) mod(k-1,N-1)+1;
-    %for k = 1:num_elements
-        %elemRow = iElemFun(k);
-        %elemCol = jElemFun(k);
-        %nodeRows = [elemRow, elemRow, elemRow+1, elemRow+1];
-        %nodeCols = [elemCol, elemCol+1, elemCol, elemCol+1];
-        %nodes = kNodeFun(nodeRows, nodeCols);
-        %for j = 1:4
-            %node = nodes(j);
-            %nodeRow = nodeRows(j);
-            %nodeCol = nodeCols(j);
-            %quadf = 1/4*h^2*f(x(nodeCol), y(nodeRow));
-            %b(j) = b(j) + quadf;
-        %end
-    %end
     u = A\b;
-    %u = pcg(A, b, 1e-10, 1000);
 end

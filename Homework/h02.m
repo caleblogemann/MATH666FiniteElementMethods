@@ -1,21 +1,44 @@
 %% Problem 1(d)
 f = @(x, y) pi^2*exp(sin(pi*x).*sin(pi*y))*(2*sin(pi*x)*sin(pi*y) + 2*cos(pi*x).^2*cos(pi*y).^2 - cos(pi*x).^2 - cos(pi*y).^2);
-g = @(x, y) (1 + pi*sin(pi*y))*(x == -1) + (1 - pi*sin(pi*y))*(x==1) + (1 + pi*sin(pi*x))*(y == -1) + (1 - pi*sin(pi*x))*(y == 1);
+g = @(x, y) (1 + pi*sin(pi*y))*(x == -1 && abs(y) < 1) + (1 - pi*sin(pi*y))*(x==1 && abs(y) < 1) + (1 + pi*sin(pi*x))*(y == -1) + (1 - pi*sin(pi*x))*(y == 1);
 uExact = @(x, y) exp(sin(pi*x).*sin(pi*y));
-N = 20;
 a = -1;
 b = 1;
-u = h02_01(a, b, N, f, g);
-uMat = reshape(u, N, N);
-h = (b - a)/(N-1);
-x = a:h:b;
-[X, Y] = meshgrid(x, x);
-surf(X, Y,uMat);
-view(2);
-U = uExact(X, Y);
-%surf(X, Y, U);
-%view(2);
-error = norm(U - uMat)/norm(U)
+
+hArray = [];
+EnergyErrorArray = [];
+L2ErrorArray = [];
+LInfErrorArray = [];
+for N = [10, 20, 40, 80]
+    [u, A] = h02_01(a, b, N, f, g);
+    uMat = reshape(u, N, N);
+    h = (b - a)/(N-1);
+    hArray = [hArray, h];
+    x = a:h:b;
+    [X, Y] = meshgrid(x, x);
+    surf(X, Y, uMat);
+    view(2);
+    U = uExact(X, Y);
+    UExact = reshape(U,N^2,1);
+    %surf(X, Y, U);
+    %view(2);
+    e = UExact - u;
+    eMat = U - uMat;
+    eMatX = [(eMat(2,:) - eMat(1,:))/h; (eMat(3:end, :) - eMat(1:end-2,:))/(2*h); (eMat(end,:) - eMat(end-1,:))/h];
+    eMatY = [(eMat(:,2) - eMat(:,1))/h, (eMat(:,3:end) - eMat(:,1:end-2))/(2*h), (eMat(:,end) - eMat(:,end-1))/h];
+    EnergyError = norm(h*sqrt(eMatX.^2 + eMatY.^2) + h*eMat, 'fro');
+    EnergyErrorArray = [EnergyErrorArray, EnergyError];
+    L2Error = norm(h*e);
+    L2ErrorArray = [L2ErrorArray, L2Error];
+    LInfError = max(abs(e));
+    LInfErrorArray = [LInfErrorArray, LInfError];
+end
+EnergyOrder = log(EnergyErrorArray(1:end-1)./EnergyErrorArray(2:end))./log(hArray(1:end-1)./hArray(2:end));
+L2Order = log(L2ErrorArray(2:end)./L2ErrorArray(1:end-1))./log(hArray(2:end)./hArray(1:end-1));
+LInfOrder = log(LInfErrorArray(2:end)./LInfErrorArray(1:end-1))./log(hArray(2:end)./hArray(1:end-1));
+disp(EnergyOrder);
+disp(L2Order);
+disp(LInfOrder);
 
 %% Problem 4
 h = 0.03;
