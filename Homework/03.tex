@@ -31,6 +31,48 @@
     \]
 
     \begin{proof}
+      The initial variational problem is formulated as finding $u \in V$ such that
+      \begin{gather*}
+        \abr{u_t, v} + \abr{\grad u, \grad v} = \abr{f, v} \quad \forall v \in V \\
+        \abr{u(0, x), v} = \abr{u_0, v}
+      \end{gather*}
+      The semidescrete form of the FEM can be expressed as finding $u_h \in V^1_h$
+      such that
+      \[
+        \abr{\p{u_h}_t, v} + \abr{\grad u_h, \grad v} = \abr{f, v} \quad \forall v \in V^1_h
+        \abr{u_h(0, x), v} = \abr{u_0, v}
+      \]
+
+      I will also make use of the following projection $R_h(u)$ which satisfies
+      \[
+        \abr{\grad R_h(u), \grad v} = \abr{\grad u, \grad v} \quad \forall v \in V^1_h
+      \]
+
+      Suppose $u$ is the solution to the original variational problem, then
+      for all $v \in V^1_h$,
+      \begin{align*}
+        \abr{u_t, v} + \abr{\grad u, \grad v} &= \abr{f, v} \\
+        \abr{u_t, v} + \abr{\grad R_h(u), \grad v} &= \abr{f, v} \\
+      \end{align*}
+      This is true for every time $t > 0$, in particular it is true at times
+      $t^n$ and $t^{n-1}$, so
+      \begin{align*}
+        \abr{u^n_t, v} + \abr{\grad R_h(u^n), \grad v} &= \abr{f^n, v} \\
+        \abr{u^{n-1}_t, v} + \abr{\grad R_h(u^{n-1}), \grad v} &= \abr{f^{n-1}, v} \\
+        \abr{\frac{u^n_t + u^{n-1}_t}{2}, v} + \abr{\grad R_h\p{\frac{u^n + u^{n-1}}{2}}, \grad v} &= \abr{\frac{f^n + f^{n-1}}{2}, v} \\
+        \abr{\grad R_h\p{\frac{u^n + u^{n-1}}{2}}, \grad v} &= \abr{\frac{f^n + f^{n-1}}{2}, v} - \abr{\frac{u^n_t + u^{n-1}_t}{2}, v}\\
+      \end{align*}
+      Consider $u^n_h$ and $u^{n-1}_h$, solutions to the FEM, they satisfy
+      \[
+        \abr{\frac{u^n_h - u^n_h}{\delta T}, v} + 
+        \abr{\grad \frac{u_h^n + u_h^{n-1}}{2}, \grad v} = 
+        \abr{\frac{f^n + f^{n-1}}{2}, v} 
+      \]
+      Let $\theta^n = R_h u^n - u^n_h$, then subtracting the last two equations
+      gives
+      \begin{align*}
+        test
+      \end{align*}
       
     \end{proof}
 
