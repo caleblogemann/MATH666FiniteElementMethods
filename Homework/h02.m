@@ -2,6 +2,8 @@
 f = @(x, y) pi^2*exp(sin(pi*x).*sin(pi*y))*(2*sin(pi*x)*sin(pi*y) + 2*cos(pi*x).^2*cos(pi*y).^2 - cos(pi*x).^2 - cos(pi*y).^2);
 g = @(x, y) (1 + pi*sin(pi*y))*(x == -1 && abs(y) < 1) + (1 - pi*sin(pi*y))*(x==1 && abs(y) < 1) + (1 + pi*sin(pi*x))*(y == -1) + (1 - pi*sin(pi*x))*(y == 1);
 uExact = @(x, y) exp(sin(pi*x).*sin(pi*y));
+uExactX = @(x, y) (cos(pi*x).*sin(pi*y)).*exp(sin(pi*x).*sin(pi*y));
+uExactY = @(x, y) (sin(pi*x).*cos(pi*y)).*exp(sin(pi*x).*sin(pi*y));
 a = -1;
 b = 1;
 
@@ -19,14 +21,18 @@ for N = [10, 20, 40, 80]
     surf(X, Y, uMat);
     view(2);
     U = uExact(X, Y);
+    UGradX = uExactX(X, Y);
+    UGradY = uExactY(X, Y);
     UExact = reshape(U,N^2,1);
     %surf(X, Y, U);
     %view(2);
     e = UExact - u;
     eMat = U - uMat;
-    eMatX = [(eMat(2,:) - eMat(1,:))/h; (eMat(3:end, :) - eMat(1:end-2,:))/(2*h); (eMat(end,:) - eMat(end-1,:))/h];
-    eMatY = [(eMat(:,2) - eMat(:,1))/h, (eMat(:,3:end) - eMat(:,1:end-2))/(2*h), (eMat(:,end) - eMat(:,end-1))/h];
-    EnergyError = norm(h*sqrt(eMatX.^2 + eMatY.^2) + h*eMat, 'fro');
+    uMatX = [(uMat(2,:) - uMat(1,:))/h; (uMat(3:end, :) - uMat(1:end-2,:))/(2*h); (uMat(end,:) - uMat(end-1,:))/h];
+    uMatY = [(uMat(:,2) - uMat(:,1))/h, (uMat(:,3:end) - uMat(:,1:end-2))/(2*h), (uMat(:,end) - uMat(:,end-1))/h];
+    eMatX = uMatX - UGradX;
+    eMatY = uMatY - UGradY;
+    EnergyError = norm(h*sqrt(eMatX.^2 + eMatY.^2), 'fro');
     EnergyErrorArray = [EnergyErrorArray, EnergyError];
     L2Error = norm(h*e);
     L2ErrorArray = [L2ErrorArray, L2Error];

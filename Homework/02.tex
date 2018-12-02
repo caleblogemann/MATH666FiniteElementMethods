@@ -347,22 +347,23 @@
 
         The following scipt uses the previous function to solve the system and
         evaluate the errors
-        \lstinputlisting[language=MATLAB, lastline=18]{h02.m}
+        \lstinputlisting[language=MATLAB, lastline=47]{h02.m}
 
         The script produces the following example plot.
         \begin{center}
           \includegraphics[scale=0.3]{Figures/02_03.png}
         \end{center}
-        The following table shows the order of convergence
+        The following table shows the order of convergence, but I was unable to
+        properly compute the energy error.
         \begin{center}
           \begin{tabular}{cccccc}
             \toprule
             M & h & Energy Error & Energy Order & L2 Error & L2 Order \\
             \midrule
-             10 & 0.2    & 3.6   & -    & 0.19      & -\\
-             20 & 0.1    & 0.9   & 1.99 & 0.0357    & 2.283 \\
-             40 & 0.05   & 0.22  & 1.99 & 0.007877  & 2.102 \\
-             80 & 0.025  & 0.057 & 1.99 & 0.001867  & 2.039 \\
+             10 & 0.2    & - & - & 0.19      & -\\
+             20 & 0.1    & - & - & 0.0357    & 2.283 \\
+             40 & 0.05   & - & - & 0.007877  & 2.102 \\
+             80 & 0.025  & - & - & 0.001867  & 2.039 \\
             %160 & 0.00625 & 0.013 & 2.05 & 0.0000004 & 0.065\\
             \bottomrule
           \end{tabular}
@@ -384,7 +385,7 @@
   \item[\#4]
     The following script uses the previous function to solve the poisson problem
     on the mesh found in problem 2.
-    \lstinputlisting[language=MATLAB, firstline=20]{h02.m}
+    \lstinputlisting[language=MATLAB, firstline=49]{h02.m}
 
     \begin{center}
       \includegraphics[scale=0.3]{Figures/02_02.png}
