@@ -14,11 +14,11 @@
 
 %\lstinputlisting[language=MATLAB]{H01_23.m}
 \begin{enumerate}
-  \item[\#1]
+  \item[\#1] % Done
     Consider the Crank-Nicolson-cG(1) FEM for the diffusion equation.
     Find $u^n_h \in V^1_h$ such that
     \begin{gather*}
-      \abr{\frac{u^n_h - u^{n-1}_h}{\delta t}, v} +
+      \abr{\frac{u^n_h - u^{n-1}_h}{\Delta t}, v} +
       \abr{\nabla \p{\frac{u^n_h + u^{n-1}_h}{2}}, v} = 
       \abr{\frac{f^n + f^{n-1}}{2}, \nabla v}
       \quad \forall v \in V^1_h, \quad \forall n = 1, 2, 3, \ldots \\
@@ -52,7 +52,7 @@
       for all $v \in V^1_h$,
       \begin{align*}
         \abr{u_t, v} + \abr{\grad u, \grad v} &= \abr{f, v} \\
-        \abr{u_t, v} + \abr{\grad R_h(u), \grad v} &= \abr{f, v} \\
+        \abr{u_t, v} + \abr{\grad R_h(u), \grad v} &= \abr{f, v}
       \end{align*}
       This is true for every time $t > 0$, in particular it is true at times
       $t^n$ and $t^{n-1}$, so
@@ -60,20 +60,74 @@
         \abr{u^n_t, v} + \abr{\grad R_h(u^n), \grad v} &= \abr{f^n, v} \\
         \abr{u^{n-1}_t, v} + \abr{\grad R_h(u^{n-1}), \grad v} &= \abr{f^{n-1}, v} \\
         \abr{\frac{u^n_t + u^{n-1}_t}{2}, v} + \abr{\grad R_h\p{\frac{u^n + u^{n-1}}{2}}, \grad v} &= \abr{\frac{f^n + f^{n-1}}{2}, v} \\
-        \abr{\grad R_h\p{\frac{u^n + u^{n-1}}{2}}, \grad v} &= \abr{\frac{f^n + f^{n-1}}{2}, v} - \abr{\frac{u^n_t + u^{n-1}_t}{2}, v}\\
+        \abr{\grad R_h\p{\frac{u^n + u^{n-1}}{2}}, \grad v} &= \abr{\frac{f^n + f^{n-1}}{2}, v} - \abr{\frac{u^n_t + u^{n-1}_t}{2}, v}
       \end{align*}
       Consider $u^n_h$ and $u^{n-1}_h$, solutions to the FEM, they satisfy
       \[
-        \abr{\frac{u^n_h - u^n_h}{\delta T}, v} + 
-        \abr{\grad \frac{u_h^n + u_h^{n-1}}{2}, \grad v} = 
-        \abr{\frac{f^n + f^{n-1}}{2}, v} 
+        \abr{\frac{u^n_h - u^{n-1}_h}{\Delta t}, v} +
+        \abr{\grad \frac{u_h^n + u_h^{n-1}}{2}, \grad v} =
+        \abr{\frac{f^n + f^{n-1}}{2}, v}
       \]
       Let $\theta^n = R_h u^n - u^n_h$, then subtracting the last two equations
       gives
       \begin{align*}
-        test
+        -\abr{\frac{u^n_h - u^{n-1}_h}{\Delta t}, v} + \abr{\grad \p{\frac{\theta^n + \theta^{n-1}}{2}}, \grad v} &= - \abr{\frac{u^n_t + u^{n-1}_t}{2}, v} \\
+        %\abr{R_h\p{\frac{u^n - u^{n-1}}{\Delta t}}, v}-\abr{\frac{u^n_h - u^{n-1}_h}{\Delta t}, v} + \abr{\grad \p{\frac{\theta^n + \theta^{n-1}}{2}}, \grad v} &= \abr{R_h\p{\frac{u^n - u^{n-1}}{\Delta t}}, v} - \abr{\frac{u^n_t + u^{n-1}_t}{2}, v} \\
+        \abr{\frac{\theta^n - \theta^{n-1}}{\Delta t}, v} + \abr{\grad \p{\frac{\theta^n + \theta^{n-1}}{2}}, \grad v} &= \abr{R_h\p{\frac{u^n - u^{n-1}}{\Delta t}}, v} - \abr{\frac{u^n_t + u^{n-1}_t}{2}, v}
+        \intertext{Let $w^n = R_h\p{\frac{u^n - u^{n-1}}{\Delta t}} - \frac{u^n_t + u^{n-1}_t}{2}$, then}
+        \abr{\frac{\theta^n - \theta^{n-1}}{\Delta t}, v} + \abr{\grad \p{\frac{\theta^n + \theta^{n-1}}{2}}, \grad v} &= \abr{w^n, v} \\
+        \abr{\theta^n - \theta^{n-1}, v} + \frac{\Delta t}{2}\abr{\grad \p{\theta^n + \theta^{n-1}}, \grad v} &= \Delta t\abr{w^n, v}
       \end{align*}
-      
+      Let $v = \theta^n + \theta^{n-1}$, then
+      \begin{align*}
+        \abr{\theta^n - \theta^{n-1}, \theta^n + \theta^{n-1}} + \frac{\Delta t}{2}\abr{\grad \p{\theta^n + \theta^{n-1}}, \grad\p{\theta^n + \theta^{n-1}}} &= \Delta t\abr{w^n, \theta^n + \theta^{n-1}} \\
+        \norm{\theta^n}^2 - \norm{\theta^{n-1}}^2 + \frac{\Delta t}{2}\norm{\grad \p{\theta^n + \theta^{n-1}}}^2 &= \Delta t\abr{w^n, \theta^n + \theta^{n-1}} \\
+        \norm{\theta^n}^2 - \norm{\theta^{n-1}}^2  &\le \Delta t\abr{w^n, \theta^n + \theta^{n-1}} \\
+        \norm{\theta^n}^2 - \norm{\theta^{n-1}}^2  &\le \Delta t\norm{w^n} \p{\norm{\theta^n} + \norm{\theta^{n-1}}} \\
+        \norm{\theta^n} - \norm{\theta^{n-1}}  &\le \Delta t\norm{w^n} \\
+        \norm{\theta^n} &\le \norm{\theta^{n-1}} + \Delta t\norm{w^n} \\
+        \norm{\theta^l} &\le \norm{\theta^{0}} + \Delta t\sum{n = 1}{l}{\norm{w^n}}
+      \end{align*}
+      Next I will just examine $w^n$.
+      \begin{align*}
+        w^n &= R_h\p{\frac{u^n - u^{n-1}}{\Delta t}} - \frac{u^n_t + u^{n-1}_t}{2} \\
+        w^n &= w^n_1 + w^n_2 \\
+        w^n_1 &= R_h\p{\frac{u^n - u^{n-1}}{\Delta t}} - \frac{u^n - u^{n-1}}{\Delta t} \\
+        w^n_2 &= \frac{u^n - u^{n-1}}{\Delta t} - \frac{u^n_t + u^{n-1}_t}{2} \\
+        \norm{w^n} &\le \norm{w^n_1} + \norm{w^n_2}
+      \end{align*}
+      First consider $\norm{w^n_1}$.
+      \begin{align*}
+        w^n_1 &= R_h\p{\frac{u^n - u^{n-1}}{\Delta t}} - \frac{u^n - u^{n-1}}{\Delta t} \\
+        &=  \frac{1}{\Delta t}\p{R_h u^n - R_h u^{n-1} - u^n + u^{n-1}} \\
+        &=  \frac{1}{\Delta t}\p{R_h u^n - u^n + u^{n-1} - R_h u^{n-1}} \\
+        \norm{w^n_1} &\le \frac{1}{\Delta t}\p{\norm{R_h u^n - u^n} + \norm{u^{n-1} - R_h u^{n-1}}}
+        \intertext{From previous work we know that $\norm{R_h u^n - u^n} \le O(h^2)$, thus}
+        \norm{w^n_1} &\le \frac{1}{\Delta t}O(h^2)
+      \end{align*}
+      Second consider $\norm{w^n_2}$,
+      \begin{align*}
+        w^n_2 &= \frac{u^n - u^{n-1}}{\Delta t} - \frac{u^n_t + u^{n-1}_t}{2} \\
+        \Delta t w^n_2 &= u^n - u^{n-1} - \frac{\Delta t}{2}\p{u^n_t + u^{n-1}_t} \\
+        z(t) &= \frac{1}{2}\p{t^{n-1} - t}\p{t^n - t} u_{ttt} \\
+        \dintt{t^n}{t^{n-1}}{z(t)}{t} &= \dintt{t^{n-1}}{t^n}{\frac{1}{2}\p{t^{n-1} - t}\p{t^n - t} u_{ttt}}{t} \\
+        &= \eval*{\frac{1}{2}\p{t^{n-1} - t}\p{t^n - t}u_{tt}}{t^{n-1}}{t^n} + \dintt*{t^{n-1}}{t^n}{\frac{1}{2}\p{t^{n-1} - t} u_{tt} + \frac{1}{2}\p{t^n - t}u_{tt}}{t} \\
+        &= \dintt*{t^{n-1}}{t^n}{\frac{1}{2}\p{t^{n-1} - t} u_{tt} + \frac{1}{2}\p{t^n - t}u_{tt}}{t} \\
+        &= \eval*{\p{\frac{1}{2}\p{t^{n-1} - t}u_t + \frac{1}{2}\p{t^{n} - t}u_t}}{t^{n-1}}{t^n} + \dintt{t^{n-1}}{t^n}{u_t}{t} \\
+        &= \frac{1}{2}\p{t^{n-1} - t^n}u^n_t - \frac{1}{2}\p{t^{n} - t^{n-1}}u^{n-1}_t + u^n - u^{n-1} \\
+        &= \frac{\Delta t}{2} u^n_t + \frac{\Delta t}{2}u^{n-1}_t + u^n - u^{n-1} \\
+        &= \Delta t w^n_2 \\
+        \Delta t w^n_2 &= \dintt{t^{n-1}}{t^n}{\frac{1}{2}\p{t^{n-1} - t}\p{t^n - t} u_{ttt}}{t} \\
+        &\le \Delta t^2 \frac{1}{2} \norm{u_{ttt}} \\
+      \end{align*}
+      Now putting these two parts together we see that
+      \begin{align*}
+        \norm{w^n} &\le \frac{1}{\Delta t} O(h^2) + \frac{1}{2} \Delta t \norm{u_{ttt}} \\
+        \Delta t \sum{n = 1}{l}{\norm{w^n}} &\le  O\p{h^2 + \Delta t^2}
+        \norm{\theta^l} &\le \norm{\theta^0} + O\p{h^2 + \Delta t^2}
+      \end{align*}
+      Assuming the initial projection is done with high enough accuracy,
+      this method will be second order in space and time.
     \end{proof}
 
   \item[\#2] % Done
@@ -322,7 +376,7 @@
           \end{bmatrix}.
         \]
 
-      \item[(b)]
+      \item[(b)] % Done
         Use this to solve the Poisson equation on $\br{0, 1} \times \br{0, 1}$
         with $u = 0$ on the boundary:
         \[
@@ -336,7 +390,7 @@
         do the convergence study.
         \lstinputlisting[language=MATLAB]{H03.m}
 
-      \item[(c)]
+      \item[(c)] % Done
         Show a plot of the solution on a reasonable resolved mesh.
         Note: Before plotting, you may want to evaluate the solution in element
         centers.
@@ -345,7 +399,7 @@
           \includegraphics[scale=.5]{Figures/03_01}
         \end{center}
 
-      \item[(d)]
+      \item[(d)] % Done
         Do a numerical convergence study in the $L^2$ norm.
         For simplicity, you can just compute the errors based on errors at
         element centers.
