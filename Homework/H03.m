@@ -3,7 +3,7 @@ a = 0;
 b = 1;
 
 L2error = [];
-Marray = [7, 13, 25, 101, 401];
+Marray = [7, 101, 401];
 for M = Marray
     u = uniformSquareCrouziexRaviart(f, M, a, b);
     h = (b-a)/M;
