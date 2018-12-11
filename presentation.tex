@@ -61,6 +61,7 @@
 \usepackage{Logemann}
 \usepackage{Integral}
 \usepackage{Derivative}
+\usepackage{Vector}
 \usepackage{Sum}
 \usepackage{SetTheory}
 \usepackage[backend=biber]{biblatex}
@@ -110,11 +111,12 @@ Mathematics Department, Iowa State University \\ % Your institution for the titl
       \begin{itemize}
         \item Navier-Stokes Equation
           \begin{align*}
-            \rho_t + \p{\rho u}_x &= 0 \\
-            \p{\rho u}_t + \p{\rho u^2 + p}_x &=  \frac{4}{3Re} u_{xx} \\
-            E_t + \p{u (E + p)}_x &= \frac{1}{Re} \p{\frac{2}{3} \p{u^2}_{xx} + \frac{\gamma}{(\gamma - 1)Pr} \p{\frac{p}{\rho}}_{xx}}
+            \nabla \cdot \v{u} &= 0 \\
+            \partial_t \v{u} + \nabla \cdot {\v{u}\v{u}} &= - \frac{1}{\rho} \nabla p + \frac{1}{\rho}\nabla \cdot \sigma + \v{g} \\
+            \partial_t h_s + \p{u, v}^T \cdot \nabla h_s &= w \\
+            \partial_t h_b + \p{u, v}^T \cdot \nabla h_b &= w
           \end{align*}
-        \item Asymptotic Limit, $\rho << L$
+        \item Lubrication or reduced Reynolds number approximation
         \item Thin-Film Equation - 1D with $q$ as fluid height.
           \[
             q_t + \p{f(x, t) q^2 - g(x, t) q^3}_x = -\p{h(x, t) q^3 q_{xxx}}_x
@@ -123,54 +125,191 @@ Mathematics Department, Iowa State University \\ % Your institution for the titl
     \end{frame}
 
   \section{Method}
-  \section{Numerical Results}
-  \section{Conclusion}
-
-  \section{Introduction}
-
     \begin{frame}
-      \frametitle{Model Equations}
+      \frametitle{Operator Splitting}
       \begin{itemize}
-        \item Navier-Stokes Equation
-          \begin{align*}
-            \rho_t + \p{\rho u}_x &= 0 \\
-            \p{\rho u}_t + \p{\rho u^2 + p}_x &=  \frac{4}{3Re} u_{xx} \\
-            E_t + \p{u (E + p)}_x &= \frac{1}{Re} \p{\frac{2}{3} \p{u^2}_{xx} + \frac{\gamma}{(\gamma - 1)Pr} \p{\frac{p}{\rho}}_{xx}}
-          \end{align*}
-        \item Asymptotic Limit, $\rho << L$
-        \item Thin-Film Equation - 1D with $u$ as fluid height.
+        \item Simplified Model
           \[
-            u_t + \p{f(x, t) u^2 - g(x, t) u^3}_x = -\p{h(x, t) u^3 u_{xxx}}_x
-          \]
-      \end{itemize}
-    \end{frame}
-
-    \begin{frame}
-      \frametitle{Current Model}
-      \begin{itemize}
-        \item Simplified Expression
-          \[
-            u_t + \p{u^2 - u^3}_x = -\p{u^3 u_{xxx}}_x
+            q_t + \p{q^2 - q^3}_x = -\p{q^3 q_{xxx}}_x \qquad \p{0, T} \times \Omega
           \]
 
         \item Operator Splitting
           \begin{align*}
-            u_t + \p{u^2 - u^3}_x &= 0 \\
-            u_t + \p{u^3 u_{xxx}}_x &= 0
+            q_t + \p{q^2 - q^3}_x &= 0 \\
+            q_t + \p{q^3 u_{xxx}}_x &= 0
+          \end{align*}
+
+        \item Strang Splitting \hfill \\
+          $\frac{1}{2}\Delta t$ step of Convection
+          \[
+            q_t + \p{q^2 - q^3}_x = 0
+          \]
+          $\Delta t$ step of Diffusion
+          \[
+            q_t + \p{q^3 u_{xxx}}_x = 0
+          \]
+          $\frac{1}{2}\Delta t$ step of Convection
+          \[
+            q_t + \p{q^2 - q^3}_x = 0
+          \]
+      \end{itemize}
+    \end{frame}
+
+  \subsection{Convection}
+    \begin{frame}
+      \frametitle{Convection}
+      \begin{itemize}
+        \item Convection Equation
+          \begin{gather*}
+            q_t + f\p{q}_x = 0 \qquad \p{0, T} \times \Omega \\
+            f(q) = q^2 - q^3
+          \end{gather*}
+
+        \item Weak Form \hfill \\
+          Find $q$ such that
+          \[
+            \dintt*{\Omega}{}{q_t v - f(q) v_x}{x} = 0
+          \]
+          for all test functions $v$
+      \end{itemize}
+    \end{frame}
+
+    \begin{frame}
+      \frametitle{Notation}
+      \begin{itemize}
+        \item Partition the domain, $\br{a, b}$ as
+          \[
+            a = x_{1/2} < \cdots < x_{j-1/2} < x_{j+1/2} < \cdots < x_{N + 1/2} = b
+          \]
+
+        \item $I_j = \br{x_{j-1/2}, x_{j+1/2}}$
+        \item $x_j = \frac{x_{j+1/2} + x_{j-1/2}}{2}$.
+          \includegraphics[scale=0.35]{Figures/Cells.pdf}
+      \end{itemize}
+    \end{frame}
+
+    \begin{frame}
+      \frametitle{Runge Kutta Discontinuous Galerkin}
+      \begin{itemize}
+        \item 
+          Find $Q(t,x)$ such that for each time $t \in \p{0, T}$, $Q(t, \cdot) \in V_h = \set{v \in L^1(\Omega): \eval{v}{I_j} \in P^k(I_j)}$
+          \begin{align*}
+            \dintt{I_j}{}{Q_t v}{x} &= \dintt{I_j}{}{f(Q)v_x}{x} \\
+            &- \p{\mcF_{j + 1/2}v^-(x_{j+1/2}) - \mcF_{j - 1/2}v^+(x_{j-1/2})}
+          \end{align*}
+          for all $v \in V_h$
+
+        \item Rusanov/Local Lax-Friedrichs Numerical Flux
+          \small{
+          \[
+            \mcF_{j+1/2} = \frac{1}{2}\p{f\p{Q^-_{j+1/2}} + f\p{Q^+_{j+1/2}}} + \max[q]{\abs{f'(q)}}\p{Q^-_{j+1/2} - Q^+_{j+1/2}}
+          \]}
+        \vspace{-.3cm}
+        \item Solve this system of ODEs with any Explicit Strong Stability Preserving (SSP) Runge-Kutta Method.
+      \end{itemize}
+    \end{frame}
+
+    \begin{frame}
+      \frametitle{Explicit SSP Runge Kutta Methods}
+      \begin{itemize}
+        \item Forward Euler
+          \begin{align*}
+            q^{n+1} = q^n + \Delta t L(q^n)
+          \end{align*}
+
+        \item Second Order
+          \begin{align*}
+            q^{\star} &= q^n + \Delta t L(q^n) \\
+            q^{n+1} &= \frac{1}{2}\p{q^n + q^{\star}} + \frac{1}{2} \Delta t L(q^{\star})
+          \end{align*}
+      \end{itemize}
+    \end{frame}
+
+  \subsection{Diffusion}
+    \begin{frame}
+      \frametitle{Diffusion}
+      \begin{itemize}
+        \item Diffusion Equation
+          \begin{align*}
+            q_t + \p{q^3 u_{xxx}}_x &= 0 \qquad \p{0, T} \times \Omega
+          \end{align*}
+
+        \item Local Discontinuous Galerkin
+          \begin{align*}
+            r &= q_{x} \\
+            s &= r_{x} \\
+            u &= q^3 s_{x} \\
+            q_t &= -u_{x}
           \end{align*}
       \end{itemize}
     \end{frame}
 
     \begin{frame}
-      \frametitle{Introduction to Discontinuous Galerkin}
+      \frametitle{Local Discontinuous Galerkin}
+      Find $Q(t, x), R(x), S(x), U(x)$ such that for all $t \in \p{0, T}$
+      $Q(t, \cdot), R, S, U \in V_h = V_h = \set{v \in L^1(\Omega): \eval{v}{I_j} \in P^k(I_j)}$
+      \begin{align*}
+        \eta &= Q^3 \\
+        \dintt{I_j}{}{R v}{x} &= -\dintt{I_j}{}{Q v_x}{x} + \p{\hat{Q}_{j+1/2}v^-_{j+1/2} - \hat{Q}_{j-1/2} v^+_{j-1/2}} \\
+        \dintt{I_j}{}{S w}{x} &= -\dintt{I_j}{}{R w_x}{x} + \p{\hat{R}_{j+1/2}w^-_{j+1/2} - \hat{R}_{j-1/2} w^+_{j-1/2}} \\
+        \dintt{I_j}{}{U y}{x} &= \dintt{I_j}{}{S_x \eta y}{x} - \p{S^-_{j+1/2}\eta^-_{j+1/2}y^-_{j+1/2} - S^+_{j-1/2}\eta^+_{j-1/2}y^+_{j-1/2}} \\
+        &+ \p{\hat{S}_{j+1/2} \hat{\eta}_{j+1/2} y^-_{j+1/2} - \hat{S}_{j-1/2} \hat{\eta}_{j-1/2} y^+_{j-1/2}} \\
+        \dintt{I_j}{}{Q_t z}{x} &= -\dintt{I_j}{}{U z_x}{x} + \p{\hat{U}_{j+1/2}z^-_{j+1/2} - \hat{U}_{j-1/2} z^+_{j-1/2}}
+      \end{align*}
+      for all $I_j \in \Omega$ and all $v, w, y, z \in V_h$.
+    \end{frame}
+
+    \begin{frame}
+      \frametitle{Numerical Fluxes}
+      \begin{align*}
+        \hat{\eta}_{j+1/2} &= \frac{1}{2}\p{\eta^+_{j+1/2} + \eta^-_{j+1/2}} \\
+        \hat{Q}_{j+1/2} &= Q^+_{j+1/2} \\
+        \hat{R}_{j+1/2} &= R^-_{j+1/2} \\
+        \hat{S}_{j+1/2} &= S^+_{j+1/2} \\
+        \hat{U}_{j+1/2} &= U^-_{j+1/2}
+      \end{align*}
+      \begin{center}
+        \includegraphics[scale=0.3]{Figures/localDG.png}
+      \end{center}
+    \end{frame}
+
+    \begin{frame}
+      \frametitle{Implicit L Stable Runge Kutta}
+      \begin{itemize}
+        \item Backward Euler
+          \begin{align*}
+            q^{n+1} = q^n + \Delta t L(q^{n+1})
+          \end{align*}
+
+        \item 2nd Order
+          \begin{align*}
+            q^{\star} &= q^n + \frac{1}{4} \Delta t \p{L(q^n) + L(q^{\star})} \\
+            3 q^{n+1} &= 4 q^{\star} - q^{n} + \Delta t L(q^{n+1})
+          \end{align*}
+      \end{itemize}
+    \end{frame}
+
+  \section{Numerical Results}
+
+  \section{Conclusion}
+    \begin{frame}
+      \frametitle{Future Work}
+      \begin{itemize}
+        \item Show second order convergence
+      \end{itemize}
+    \end{frame}
+
+  \section{Introduction}
+
+    \begin{frame}
+      \frametitle{Notation}
       \begin{itemize}
         \item Partition the domain, $\br{a, b}$ as
           \[
             a = x_{1/2} < \cdots < x_{i-1/2} < x_{i+1/2} < \cdots < x_{N + 1/2} = b
           \]
 
-        \item $V_i = \br{x_{i-1/2}, x_{i+1/2}}$
-        \item $\Delta x = x_{i + 1/2} - x_{i - 1/2}$
+        \item $I_j = \br{x_{j-1/2}, x_{j+1/2}}$
         \item $x_i = \frac{x_{i+1/2} + x_{i-1/2}}{2}$.
           \includegraphics[scale=0.35]{Figures/Cells.pdf}
       \end{itemize}
@@ -334,16 +473,16 @@ Mathematics Department, Iowa State University \\ % Your institution for the titl
       %\end{itemize}
     %\end{frame}
 
-    \begin{frame}
-      \frametitle{Multigrid Solver}
-      \begin{itemize}
-        \item Relaxation e.g. Jacobi Relaxation
-      \end{itemize}
-      \begin{center}
-        \includegraphics[scale=0.25]{Figures/restriction.pdf} \\
-        \includegraphics[scale=0.25]{Figures/interpolation.pdf}
-      \end{center}
-    \end{frame}
+    %\begin{frame}
+      %\frametitle{Multigrid Solver}
+      %\begin{itemize}
+        %\item Relaxation e.g. Jacobi Relaxation
+      %\end{itemize}
+      %\begin{center}
+        %\includegraphics[scale=0.25]{Figures/restriction.pdf} \\
+        %\includegraphics[scale=0.25]{Figures/interpolation.pdf}
+      %\end{center}
+    %\end{frame}
 
     \begin{frame}
       \frametitle{Multigrid Solver}
