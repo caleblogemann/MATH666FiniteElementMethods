@@ -60,6 +60,7 @@
 
 \usepackage{Logemann}
 \usepackage{Integral}
+\usepackage{LinearAlgebra}
 \usepackage{Derivative}
 \usepackage{Vector}
 \usepackage{Sum}
@@ -102,7 +103,6 @@ Mathematics Department, Iowa State University \\ % Your institution for the titl
       \end{center}
       \begin{itemize}
         \item Industrial Coating
-        \item Paint Drying
       \end{itemize}
     \end{frame}
 
@@ -112,7 +112,7 @@ Mathematics Department, Iowa State University \\ % Your institution for the titl
         \item Navier-Stokes Equation
           \begin{align*}
             \nabla \cdot \v{u} &= 0 \\
-            \partial_t \v{u} + \nabla \cdot {\v{u}\v{u}} &= - \frac{1}{\rho} \nabla p + \frac{1}{\rho}\nabla \cdot \sigma + \v{g} \\
+            \partial_t \v{u} + \nabla \cdot \p{\v{u}\v{u}} &= - \frac{1}{\rho} \nabla p + \frac{1}{\rho}\nabla \cdot \sigma + \v{g} \\
             \partial_t h_s + \p{u, v}^T \cdot \nabla h_s &= w \\
             \partial_t h_b + \p{u, v}^T \cdot \nabla h_b &= w
           \end{align*}
@@ -231,7 +231,7 @@ Mathematics Department, Iowa State University \\ % Your institution for the titl
       \begin{itemize}
         \item Diffusion Equation
           \begin{align*}
-            q_t + \p{q^3 u_{xxx}}_x &= 0 \qquad \p{0, T} \times \Omega
+            q_t + \p{q^3 q_{xxx}}_x &= 0 \qquad \p{0, T} \times \Omega
           \end{align*}
 
         \item Local Discontinuous Galerkin
@@ -247,7 +247,7 @@ Mathematics Department, Iowa State University \\ % Your institution for the titl
     \begin{frame}
       \frametitle{Local Discontinuous Galerkin}
       Find $Q(t, x), R(x), S(x), U(x)$ such that for all $t \in \p{0, T}$
-      $Q(t, \cdot), R, S, U \in V_h = V_h = \set{v \in L^1(\Omega): \eval{v}{I_j} \in P^k(I_j)}$
+      $Q(t, \cdot), R, S, U \in V_h = \set{v \in L^1(\Omega): \eval{v}{I_j} \in P^k(I_j)}$
       \begin{align*}
         \eta &= Q^3 \\
         \dintt{I_j}{}{R v}{x} &= -\dintt{I_j}{}{Q v_x}{x} + \p{\hat{Q}_{j+1/2}v^-_{j+1/2} - \hat{Q}_{j-1/2} v^+_{j-1/2}} \\
@@ -274,7 +274,7 @@ Mathematics Department, Iowa State University \\ % Your institution for the titl
     \end{frame}
 
     \begin{frame}
-      \frametitle{Implicit L Stable Runge Kutta}
+      \frametitle{Implicit L-Stable Runge Kutta}
       \begin{itemize}
         \item Backward Euler
           \begin{align*}
@@ -289,290 +289,81 @@ Mathematics Department, Iowa State University \\ % Your institution for the titl
       \end{itemize}
     \end{frame}
 
+    \begin{frame}
+      \frametitle{Linear Solver}
+      \begin{itemize}
+        \item Generalized Minimal Residual (GMRES)
+          \begin{gather*}
+            \min[x \in K_n]{\norm{A\v{x} - \v{b}}} \\
+            K_n = \spanspace{\v{b}, A\v{b}, A^2\v{b}, \ldots, A^{n-1}\v{b}} 
+          \end{gather*}
+
+        \item Preconditioned
+          \begin{align*}
+            P &= A^{-1}_0 \\
+            PAx &= Pb
+          \end{align*}
+      \end{itemize}
+    \end{frame}
+
   \section{Numerical Results}
+    \begin{frame}
+      \frametitle{Riemann Problem}
+      \begin{center}
+        \includegraphics[scale=0.5]{Figures/reimann0.png}
+      \end{center}
+    \end{frame}
+    %\begin{frame}
+      %\frametitle{Numerical Results - Riemann Problem}
+      %\begin{center}
+        %\includegraphics[scale=0.5]{Figures/reimann20.png}
+      %\end{center}
+    %\end{frame}
+    %\begin{frame}
+      %\frametitle{Numerical Results - Riemann Problem}
+      %\begin{center}
+        %\includegraphics[scale=0.5]{Figures/reimann40.png}
+      %\end{center}
+    %\end{frame}
+    \begin{frame}
+      \frametitle{Riemann Problem}
+      \begin{center}
+        \includegraphics[scale=0.5]{Figures/reimann60.png}
+      \end{center}
+    \end{frame}
+    %\begin{frame}
+      %\frametitle{Numerical Results - Riemann Problem}
+      %\begin{center}
+        %\includegraphics[scale=0.5]{Figures/reimann80.png}
+      %\end{center}
+    %\end{frame}
+    %\begin{frame}
+      %\frametitle{Numerical Results - Riemann Problem}
+      %\begin{center}
+        %\includegraphics[scale=0.5]{Figures/reimann100.png}
+      %\end{center}
+    %\end{frame}
+
+    \begin{frame}
+      \frametitle{Square Wave}
+      \begin{center}
+        \includegraphics[scale=0.5]{Figures/squareWaveInitial.png}
+      \end{center}
+    \end{frame}
+    \begin{frame}
+      \frametitle{Square Wave}
+      \begin{center}
+        \includegraphics[scale=0.5]{Figures/squareWaveFinal.png}
+      \end{center}
+    \end{frame}
 
   \section{Conclusion}
     \begin{frame}
       \frametitle{Future Work}
       \begin{itemize}
         \item Show second order convergence
-      \end{itemize}
-    \end{frame}
-
-  \section{Introduction}
-
-    \begin{frame}
-      \frametitle{Notation}
-      \begin{itemize}
-        \item Partition the domain, $\br{a, b}$ as
-          \[
-            a = x_{1/2} < \cdots < x_{i-1/2} < x_{i+1/2} < \cdots < x_{N + 1/2} = b
-          \]
-
-        \item $I_j = \br{x_{j-1/2}, x_{j+1/2}}$
-        \item $x_i = \frac{x_{i+1/2} + x_{i-1/2}}{2}$.
-          \includegraphics[scale=0.35]{Figures/Cells.pdf}
-      \end{itemize}
-    \end{frame}
-
-    \begin{frame}
-      \frametitle{Numerical Solutions}
-      \begin{itemize}
-        \item Use canonical variable $\xi \in \br{-1, 1}$
-        \item Let $\set{\phi^k(\xi)}$ be the Legendre polynomials.
-
-        \item Solution of order $M$ on each cell
-          \[
-            \eval{u}{x \in V_i}{} \approx U_i = \sum*{k = 1}{M}{U_i^k \phi^k(\xi)}
-          \]
-          \includegraphics[scale=0.35]{Figures/DG.pdf}
-      \end{itemize}
-    \end{frame}
-
-  \section{Convection}
-    \begin{frame}
-      \frametitle{Convection}
-      \begin{itemize}
-        \item Convection Equation
-          \begin{gather*}
-            u_t + \frac{2}{\Delta x} f(u)_\xi = 0 \\
-            f(u) = u^2 - u^3
-          \end{gather*}
-
-        \item Weak Form
-          \[
-            \dintt*{-1}{1}{u_t \phi(\xi) + \frac{2}{\Delta x}f(u)_\xi \phi(\xi)}{\xi} = 0
-          \]
-
-        \item Runge-Kutta Discontinuous Galerkin
-          %\[
-            %\dintt{-1}{1}{\p{U_i}_t \phi^{\ell}(\xi)}{\xi} - \dintt{-1}{1}{\frac{2}{\Delta x}\p{\p{U_i}^2 - \p{U_i}^3} \phi^{\ell}_{\xi}(\xi)}{\xi} + \frac{2}{\Delta x}\p{\mcF_{i + 1/2} \phi^{\ell}(1) - \mcF_{i - 1/2} \phi^{\ell}(-1)} = 0
-          %\]
-          \[
-            \dot{U_i^{\ell}} = \frac{1}{\Delta x}\dintt{-1}{1}{f(U_i)\phi_{\xi}^{\ell}}{\xi} - \frac{1}{\Delta x} \p{\mcF_{i + 1/2} - \mcF_{i - 1/2}}
-          \]
-
-        \item Rusanov Numerical Flux
-          \[
-            \mcF_{j+1/2} = \frac{f\p{U_{i+1}(-1)} + f\p{U_{i}(1)}}{2} \phi^{\ell}(1)
-          \]
-
-        \item Solve this system of ODEs with any Explicit Strong Stability Preserving (SSP) Runge-Kutta Method.
-      \end{itemize}
-    \end{frame}
-
-    \begin{frame}
-      \frametitle{Numerical Example - Square Wave}
-      \begin{center}
-        \includegraphics[scale=0.6]{Figures/squarewave00.png}
-      \end{center}
-    \end{frame}
-    \begin{frame}
-      \frametitle{Numerical Example - Square Wave}
-      \begin{center}
-        \includegraphics[scale=0.6]{Figures/squarewave04.png}
-      \end{center}
-    \end{frame}
-    \begin{frame}
-      \frametitle{Numerical Example - Square Wave}
-      \begin{center}
-        \includegraphics[scale=0.6]{Figures/squarewave08.png}
-      \end{center}
-    \end{frame}
-    \begin{frame}
-      \frametitle{Numerical Example - Square Wave}
-      \begin{center}
-        \includegraphics[scale=0.6]{Figures/squarewave12.png}
-      \end{center}
-    \end{frame}
-    \begin{frame}
-      \frametitle{Numerical Example - Square Wave}
-      \begin{center}
-        \includegraphics[scale=0.6]{Figures/squarewave16.png}
-      \end{center}
-    \end{frame}
-    \begin{frame}
-      \frametitle{Numerical Example - Square Wave}
-      \begin{center}
-        \includegraphics[scale=0.6]{Figures/squarewave20.png}
-      \end{center}
-    \end{frame}
-
-  \section{Hyper-Diffusion}
-    \begin{frame}
-      \frametitle{Hyper-Diffusion}
-      \begin{itemize}
-        \item Hyper-Diffusion Equation
-          \[
-            u_t + \frac{16}{\Delta x^4} \p{u^3 u_{\xi\xi\xi}}_\xi = 0
-          \]
-
-        \item Local Discontinuous Galerkin (LDG)
-          \begin{align*}
-            q &= \frac{2}{\Delta x} u_{\xi} \\
-            r &= \frac{2}{\Delta x} q_{\xi} \\
-            s &= \frac{2}{\Delta x} u^3 r_{\xi} \\
-            u_t &= -\frac{2}{\Delta x} s_{\xi}
-          \end{align*}
-      \end{itemize}
-    \end{frame}
-
-    \begin{frame}
-      \frametitle{Local Discontinuous Galerkin}
-      \begin{align*}
-        \eta(\xi) &= \p{U_i^{n}}^3 \\
-        Q_i^{\ell} &= -\frac{1}{\Delta x} \p{\dintt{-1}{1}{U_i \phi_{\xi}^{\ell}}{\xi}
-        - \mcF(U)_{i+1/2}^{\ell} + \mcF(U)_{i - 1/2}^{\ell}} \\
-        R_i^{\ell} &= -\frac{1}{\Delta x} \p{\dintt{-1}{1}{Q_i \phi_{\xi}^{\ell}}{\xi}
-        - \mcF(Q)_{i+1/2}^{\ell} + \mcF(Q)_{i - 1/2}^{\ell}} \\
-        S_i^{\ell} &= \frac{1}{\Delta x} \p{\dintt{-1}{1}{(R_i)_{\xi} \eta(\xi) \phi^{\ell}}{\xi}} \\
-        &+ \frac{1}{\Delta x}\p{\mcF(\eta)_{i + 1/2} \mcF(R)_{i+1/2}^{\ell} - \mcF(\eta)_{i-1/2} \mcF(R)_{i-1/2}^{\ell}}\\
-        \dot{U}_i^{\ell} &= \frac{1}{\Delta x} \p{\dintt{-1}{1}{S_i \phi_{\xi}^{\ell}}{\xi}
-        - \mcF(S)_{i+1/2}^{\ell} + \mcF(S)_{i - 1/2}^{\ell}}
-      \end{align*}
-    \end{frame}
-
-    \begin{frame}
-      \frametitle{Local Discontinuous Galerkin}
-      \begin{align*}
-        \mcF(\eta)_{i+1/2} &= \frac{1}{2}\p{\eta_{i+1}(-1) - \eta_{i}(1)} \\
-        \mcF(\eta)_{i-1/2} &= \frac{1}{2}\p{\eta_{i-1}(1) - \eta_{i}(-1)} \\
-        \mcF(*)_{i+1/2}^{\ell} &= \phi^{\ell}(1) *_{i+1/2}
-      \end{align*}
-      \begin{center}
-        \includegraphics[scale=0.3]{Figures/localDG.pdf}
-      \end{center}
-    \end{frame}
-
-    \begin{frame}
-      \frametitle{Local Discontinuous Galerkin}
-      \begin{itemize}
-        \item Explicit SSP Runge Kutta
-          \begin{itemize}
-            \item Severe time step restriction
-            \item $\Delta t \sim \Delta x^4$
-            \item $\Delta x = .1 \to \Delta t \approx 10^{-4}$
-            \item $\Delta x = .01 \to \Delta t \approx 10^{-8}$
-          \end{itemize}
-
-        \item Implicit SSP Runge Kutta
-          \begin{itemize}
-            \item Linear System Solver
-            \item Stabilized BiConjugate Gradient
-            \item MultiGrid Solver
-          \end{itemize}
-      \end{itemize}
-    \end{frame}
-
-    %\begin{frame}
-      %\frametitle{Linear Solver}
-      %\begin{itemize}
-        %\item Stabilized BiConjugate Gradient
-        %\item MultiGrid Solver \hfill \\
-
-      %\end{itemize}
-    %\end{frame}
-
-    %\begin{frame}
-      %\frametitle{Multigrid Solver}
-      %\begin{itemize}
-        %\item Relaxation e.g. Jacobi Relaxation
-      %\end{itemize}
-      %\begin{center}
-        %\includegraphics[scale=0.25]{Figures/restriction.pdf} \\
-        %\includegraphics[scale=0.25]{Figures/interpolation.pdf}
-      %\end{center}
-    %\end{frame}
-
-    \begin{frame}
-      \frametitle{Multigrid Solver}
-      V-Cycle
-      \begin{center}
-        \includegraphics[scale=0.25]{Figures/vcycle.pdf}
-      \end{center}
-    \end{frame}
-
-    \begin{frame}
-      \frametitle{Multigrid Solver}
-      \begin{center}
-        \includegraphics[scale=0.35]{Figures/mucycle.pdf}
-      \end{center}
-    \end{frame}
-
-  \section{Operator Splitting}
-    \begin{frame}
-      \frametitle{Operator Splitting}
-      \begin{itemize}
-        \item Strang Splitting
-          \begin{itemize}
-            \item 1 time step
-              \begin{itemize}
-                \item 1/2 time step for convection
-                \item 1 time step for hyper-diffusion
-                \item 1/2 time step for convection
-              \end{itemize}
-            \item Second order splitting
-          \end{itemize}
-      \end{itemize}
-    \end{frame}
-
-    \begin{frame}
-      \frametitle{Numerical Results - Riemann Problem}
-      \begin{center}
-        \includegraphics[scale=0.5]{Figures/reimann0.png}
-      \end{center}
-    \end{frame}
-    \begin{frame}
-      \frametitle{Numerical Results - Riemann Problem}
-      \begin{center}
-        \includegraphics[scale=0.5]{Figures/reimann20.png}
-      \end{center}
-    \end{frame}
-    \begin{frame}
-      \frametitle{Numerical Results - Riemann Problem}
-      \begin{center}
-        \includegraphics[scale=0.5]{Figures/reimann40.png}
-      \end{center}
-    \end{frame}
-    \begin{frame}
-      \frametitle{Numerical Results - Riemann Problem}
-      \begin{center}
-        \includegraphics[scale=0.5]{Figures/reimann60.png}
-      \end{center}
-    \end{frame}
-    \begin{frame}
-      \frametitle{Numerical Results - Riemann Problem}
-      \begin{center}
-        \includegraphics[scale=0.5]{Figures/reimann80.png}
-      \end{center}
-    \end{frame}
-    \begin{frame}
-      \frametitle{Numerical Results - Riemann Problem}
-      \begin{center}
-        \includegraphics[scale=0.5]{Figures/reimann100.png}
-      \end{center}
-    \end{frame}
-
-  \section{Conclusion}
-    \begin{frame}
-      \frametitle{Future Work}
-      \begin{itemize}
-        \item Higher dimensions
-        \item Curved surfaces
-        \item Space and time dependent coefficients
         \item Runge Kutta IMEX
-      \end{itemize}
-    \end{frame}
-
-    \begin{frame}
-      \frametitle{Conclusion}
-      \begin{itemize}
-        \item Thanks
-          \begin{itemize}
-            \item James Rossmanith
-            \item Alric Rothmayer
-          \end{itemize}
-        \item Questions?
+        \item Space and time dependent coefficients
       \end{itemize}
     \end{frame}
 
